@@ -18,24 +18,24 @@ claude-code-analysis/
 
 ## 总述
 
-本目录中的分析文档基于 `src/` 源码静态阅读整理，目标是从“总分总”的结构回答以下核心系统设计问题：
+本目录中的分析文档基于 `src/` 源码静态阅读整理，主要探讨以下系统设计问题：
 
-1. 这个项目的软件架构是什么，程序从哪里启动。
-2. 从安全视角看，项目收集了哪些用户信息，如何被利用，以及代码层面存在哪些风险与对应的防范措施。
-3. Agent Memory 机制体系（含多层级存储与 Session Compaction 打薄压缩逻辑）是怎么实现的。
-4. Agent 极具特色的能力扩充机制（如 Skills 技能扩展、Tool Call 调用链、MCP 通信协议集成）的技术细节与运行方式分别是什么。
-5. 针对大模型本地操作风险，系统是如何应对系统级逃逸并利用 Sandbox（沙盒隔离）等机制保护宿主机的。
-6. 该项目自身的程序架构亮点有哪些。
-7. 对 `src/components/` 基于 React 的 TUI 控制台中各组件族、关键子组件以及叶子组件进行专项拆解。
-8. 该项目与 `Codex`、`Gemini CLI`、`Aider`、`Cursor` 等同类产品相比，有哪些显著的代差与体验差异。
-9. 相关结论分别对应哪些源码证据和外部公开资料。
+1. 软件架构设计与程序启动路径。
+2. 安全分析：用户信息的收集、利用情况，潜在的安全风险及防范措施。
+3. Agent Memory 机制（多层级存储与 Session 压缩逻辑）及实现细节。
+4. 能力扩充机制（Skills 扩展、Tool Call 机制、MCP 集成）的技术实现及运行方式。
+5. 隔离机制：通过 Sandbox 防范本地操作风险的设计与实现。
+6. 内部程序架构设计与模块特点。
+7. UI 拆解：`src/components/` 内 TUI 控制台的组件构成。
+8. 竞品对比：与 `Codex`、`Gemini CLI`、`Aider`、`Cursor` 等工具的功能及体系差异分析。
+9. 源码证据与外部公开资料对照。
 
-总判断先放在这里：
+主要系统特征：
 
-- 该项目绝不仅是一个简单的命令行聊天工具，而是一套强隔离、底层闭环的**本地代码 Agent 平台**。
-- 它最突出的特征是：统一的执行内核、多态分层的 Memory 系统、以及基于 MCP / Skills 的强悍平台化外接扩展能力。
-- 从架构防御侧看，它利用原生 Sandbox 隔离与细粒度 Tool Permission 拦截建立了精密的防线来保障宿主机的运行安全。
-- 从用户隐私视角看，真正的风险焦点并不在于单一的数据打点 (Telemetry)，而是“庞大的模型上下文流出 + 本地持久化记忆库 + 外部组件的远程通信能力”组合后的信息发散边界。
+- 该项目属于本地代码 Agent 平台，具备独立的执行逻辑与环境闭环设计。
+- 核心功能包含统一的执行内核、分层 Memory 系统，以及基于 MCP 和 Skills 的外接扩展支持。
+- 架构防御层面，系统采用了本地 Sandbox 隔离与工具调用权限（Tool Permission）控制措施。
+- 隐私层面，涉及数据流出的环节主要包括模型上下文交互、本地持久化存储和外部组件远程通信功能。
 
 ## 一图总览
 
@@ -96,15 +96,16 @@ claude-code-analysis/
 - [第五章：Tool Call 机制实现细节](./analysis/04b-tool-call-implementation.md)
 - [第六章：MCP 技术实现细节与运行机制](./analysis/04d-mcp-implementation.md)
 - [第七章：Sandbox 技术实现细节与运行机制](./analysis/04e-sandbox-implementation.md)
+- [第八章：Context 上下文管理实现细节](./analysis/04f-context-management.md)
 
 ### 第四部分：程序架构及亮点
 
-- [第八章：程序架构及亮点](./analysis/05-differentiators-and-comparison.md)
+- [第九章：程序架构及亮点](./analysis/05-differentiators-and-comparison.md)
 
 ### 第五部分：扩展分析
 
-- [第九章：额外探索与补充发现](./analysis/06-extra-findings.md)
-- [第十章：隐藏命令、Feature Flags 与彩蛋](./analysis/11-hidden-features-and-easter-eggs.md)
+- [第十章：额外探索与补充发现](./analysis/06-extra-findings.md)
+- [第十一章：隐藏命令、Feature Flags 与彩蛋](./analysis/11-hidden-features-and-easter-eggs.md)
 
 ### 第六部分：组件体系详解
 
@@ -118,17 +119,17 @@ claude-code-analysis/
 
 ### 第七部分：同类产品对比
 
-- [第十一章：同类产品对比](./analysis/08-competitive-comparison.md)
+- [第十二章：同类产品对比](./analysis/08-competitive-comparison.md)
 - [附录A：外部对比资料](./analysis/08-reference-comparison-sources.md)
 
 ### 第八部分：证据与资料
 
-- [第十二章：代码证据索引](./analysis/07-code-evidence-index.md)
+- [第十三章：代码证据索引](./analysis/07-code-evidence-index.md)
 - [附录B：src 详细文件树（含文件说明）](./analysis/10-src-file-tree.md)
 
 ### 第九部分：总结
 
-- [第十三章：总结结论](./analysis/09-final-summary.md)
+- [第十四章：总结结论](./analysis/09-final-summary.md)
 
 ---
 
