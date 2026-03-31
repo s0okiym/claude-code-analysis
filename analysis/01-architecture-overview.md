@@ -11,6 +11,64 @@
 
 结论先行：这个项目不是单纯的命令行聊天程序，而是一套本地 agent 平台。它采用“CLI 引导层 + TUI/REPL 交互层 + Query/Agent 执行内核 + Tool/Permission 层 + Memory/Persistence 层 + MCP/Remote/Swarm 扩展层”的分层结构。
 
+先给出两个总图，后面各节再分别展开。
+
+### 1.1 总体分层图
+
+```text
++------------------------------+
+| CLI 引导层                   |
+| entrypoints/cli.tsx          |
+| main.tsx                     |
++------------------------------+
+               |
+               v
++------------------------------+
+| 初始化层                     |
+| init.ts / setup.ts           |
++------------------------------+
+      |                  |
+      v                  v
++------------------+   +------------------------------+
+| 控制面 / 命令层  |   | TUI / REPL 层                |
+| commands.ts      |-->| replLauncher.tsx / REPL.tsx  |
+| slash/menu       |   +------------------------------+
++------------------+                  |
+                                      v
+                         +------------------------------+
+                         | 执行内核                     |
+                         | query.ts / QueryEngine.ts    |
+                         +------------------------------+
+                           |            |            |
+                           v            v            v
+                 +---------------+ +-----------------+ +------------------+
+                 | Tool/Perm 层  | | Memory/Persist  | | 扩展层           |
+                 | Tool.ts       | | sessionStorage  | | MCP/Plugin/      |
+                 | orchestration | | memdir/SM       | | Remote/Swarm     |
+                 +---------------+ +-----------------+ +------------------+
+
+说明：
+- 初始化层先把运行环境建立起来。
+- 控制面决定如何进入工作台。
+- 执行内核向下调用工具、memory 与扩展层。
+```
+
+### 1.2 默认交互主链路图
+
+```text
+entrypoints/cli.tsx
+  -> main.tsx
+  -> init.ts + setup.ts
+  -> launchRepl()
+  -> App + REPL
+  -> PromptInput / slash command / footer 菜单
+  -> query()
+     -> services/api/claude.ts
+     -> runTools() / StreamingToolExecutor
+     -> sessionStorage / SessionMemory / compact / hooks
+     -> 返回到 query 主循环
+```
+
 ## 2. 程序入口
 
 ### 2.1 轻量入口
@@ -24,6 +82,19 @@
 - 某些内置 MCP server 或浏览器桥接模式提前切换执行路径
 
 这种设计的好处是：普通快速命令不需要加载整个应用，提高了启动速度，也降低了初始化副作用。
+
+用流程图看，这一层更像“入口分流器”而不是完整应用：
+
+```text
+进程启动
+  -> 读取 argv
+  -> 判断是否命中快路径
+     -> 是：直接走专门入口并退出
+        - --version
+        - --dump-system-prompt
+        - remote-control / daemon / bg / runner
+     -> 否：进入 main.tsx 主启动器
+```
 
 ### 2.2 主启动器
 
@@ -236,6 +307,35 @@ entrypoints/cli.tsx
 ```
 
 这条链路非常完整，说明项目不是“把 API 包一层终端皮肤”，而是做了真正的本地 agent runtime。
+
+如果再把“控制面”和“执行面”的边界画清楚，可以得到下面这个视图：
+
+```text
+控制面
+  - commands.ts
+  - REPL / PromptInput / Messages
+  - Settings / MCP / Tasks / Teams / Hooks
+
+执行面
+  - query.ts / QueryEngine.ts
+  - Tool / Permission
+  - Transcript / Memory / Compact
+  - MCP / Remote / Plugin / Swarm
+
+关系
+  commands.ts
+    -> REPL / PromptInput / Messages
+    -> query.ts / QueryEngine.ts
+
+  Settings / MCP / Tasks / Teams / Hooks
+    -> REPL / PromptInput / Messages
+    -> 间接影响执行面状态
+
+  query.ts / QueryEngine.ts
+    -> Tool / Permission
+    -> Transcript / Memory / Compact
+    -> MCP / Remote / Plugin / Swarm
+```
 
 ## 6. 本章小结
 

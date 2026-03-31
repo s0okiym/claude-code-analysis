@@ -23,6 +23,25 @@
 
 前者负责“展示已经发生了什么”，后者负责“组织下一步要做什么”。
 
+先给出组件主干图：
+
+```text
+App
+  -> REPL / FullscreenLayout
+     -> Messages
+     |    -> VirtualMessageList
+     |         -> MessageRow / Message / messages/*
+     |
+     -> PromptInput
+          -> Footer / Suggestions / Notifications
+          -> QuickOpen / Search / Tasks / Teams / Bridge / ModelPicker
+
+Messages 与 PromptInput 都向下依赖：
+  -> AppState
+  -> hooks
+  -> services
+```
+
 ## 2. 组件分层
 
 ### 2.1 Provider 与根包装层
@@ -159,6 +178,35 @@
 
 - 交互主干非常清晰，主链路没有被“设置页”之类的边缘能力污染。
 - 能力面板不直接互相依赖，而是共同依赖 `AppState`、hooks 和 services，所以横向耦合可控。
+
+也可以用“编排层 -> 渲染层 -> 状态/服务层”的形式理解：
+
+```text
+编排层
+  - App
+  - REPL
+  - Messages
+  - PromptInput
+    |
+    +--> 渲染层
+    |      - message leaves
+    |      - dialog leaves
+    |      - select leaves
+    |
+    +--> 能力面板层
+           - permissions
+           - agents
+           - mcp
+           - tasks
+           - teams
+
+渲染层 / 能力面板层
+  -> 状态与上下文
+     - AppState
+     - overlay
+     - notifications
+  -> hooks / services / tools / tasks
+```
 
 ### 4.2 状态注入方式
 
