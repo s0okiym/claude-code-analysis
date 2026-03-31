@@ -2,7 +2,7 @@
 
 ## 事件背景
 
-2026年3月31日，安全研究者 [Chaofan Shou](https://x.com/Fried_rice) 发现 Anthropic 发布到 npm 的 Claude Code 包中，官方没有删除source map 文件, 这意味着 Claude Code 的完整 TypeScript 源码，51.2万行，1903个文件，全部暴露在公网上.
+美国东部时间2026年3月31日凌晨4点23分，安全研究者 [Chaofan Shou](https://x.com/Fried_rice) 发现 Anthropic 发布到 npm 的 Claude Code 包中，官方没有删除source map 文件, 这意味着 Claude Code 的完整 TypeScript 源码，51.2万行，1903个文件，全部暴露在公网上.
 
 ## 总述
 
@@ -30,33 +30,33 @@
 
 ```text
 +---------------------------+
-| CLI / 多入口              |
+| CLI / 多入口               |
 | entrypoints/cli.tsx       |
 | main.tsx                  |
 +---------------------------+
             |
             v
 +---------------------------+
-| 初始化与运行环境          |
+| 初始化与运行环境             |
 | init.ts / setup.ts        |
 +---------------------------+
       |                |
       v                v
 +----------------+   +---------------------------+
-| 命令与控制面   |   | TUI / REPL 工作台         |
+| 命令与控制面     |   | TUI / REPL 工作台          |
 | commands.ts    |-->| App / REPL / Messages     |
 | PromptInput... |   | / PromptInput             |
 +----------------+   +---------------------------+
                              |
                              v
                   +---------------------------+
-                  | Query / Agent 执行内核    |
+                  | Query / Agent 执行内核     |
                   | query.ts / QueryEngine.ts |
                   +---------------------------+
                     |           |           |
                     v           v           v
           +---------------+ +--------------------+ +----------------------+
-          | Tool/Perm     | | Transcript/Memory  | | 平台扩展层           |
+          | Tool/Perm     | | Transcript/Memory  | | 平台扩展层             |
           | Tool.ts       | | sessionStorage     | | MCP/Plugin/Remote/   |
           | orchestration | | memdir/SessionMem  | | Swarm                |
           +---------------+ +--------------------+ +----------------------+
